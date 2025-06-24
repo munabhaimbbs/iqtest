@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IQ Test</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    #quiz, #result { display: none; }
+    .question { margin-top: 20px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 40px;
+    background: #f4f4f9;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  #start, #quiz, #result {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+
+  label, input[type="date"], button {
+    display: block;
+    margin: 10px 0;
+    font-size: 16px;
+    width: 100%;
+  }
+
+  input[type="radio"] {
+    margin-right: 8px;
+  }
+
+  button {
+    padding: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #2980b9;
+  }
+
+  .question {
+    margin-top: 20px;
+  }
+
+  #timer {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #e74c3c;
+  }
+</style>
+  <h1>IQ Test</h1>
+  
+  <div id="start">
+    <label for="dob">Enter Date of Birth:</label>
+    <input type="date" id="dob" required />
+    <button onclick="startTest()">Start Test</button>
+  </div>
+
+  <div id="timer"></div>
+  <div id="quiz">
+    <p id="question"></p>
+    <div id="options"></div>
+    <button onclick="nextQuestion()">Next</button>
+  </div>
+
+  <div id="result">
+    <h2>Test Completed!</h2>
+    <p id="scoreDisplay"></p>
+    <p id="iqDisplay"></p>
+  </div>
+
+  <script>
+    
+    const questions = [
+      {
+        question: "4,7,12,15,20,?. Find the value of ?",
+        options: ["45", "23", "25", "39"],
+        correct: "23"
+      },
+      {
+        question: "3,6,11,18,27,?. Find the value of ?",
+        options: ["27", "38", "17", "53"],
+        correct: "38"
+      },
+      {
+        question: "4,7,12,19,28,?. Find the value of ?",
+        options: ["56", "18", "54", "39"],
+        correct: "39"
+      },
+      {
+        question: "13, 17, 19, 23,29,?. Find the value of ?",
+        options: ["31", "12", "24", "11"],
+        correct: "31"
+      },
+      {
+        question: "1,2,6,24,120,?. Find the value of ?",
+        options: ["48", "18", "720", "480"],
+        correct: "720"
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let age = 0;
+    let selected = null;
+    let timeLeft = 15 * 60;
+
+    function startTest() {
+      const dob = document.getElementById("dob").value;
+      if (!dob) return alert("Please enter your date of birth.");
+      
+      const birthDate = new Date(dob);
+      const today = new Date();
+      age = today.getFullYear() - birthDate.getFullYear();
+      if (today < new Date(birthDate.setFullYear(today.getFullYear()))) age--;
+
+      document.getElementById("start").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      showQuestion();
+      startTimer();
+    }
+
+    function showQuestion() {
+      const q = questions[current];
+      document.getElementById("question").textContent = `Q${current + 1}: ${q.question}`;
+      const opts = q.options.map(opt => `
+        <label>
+          <input type="radio" name="option" value="${opt}" /> ${opt}
+        </label><br>
+      `).join("");
+      document.getElementById("options").innerHTML = opts;
+    }
+
+    function nextQuestion() {
+      const selectedOption = document.querySelector('input[name="option"]:checked');
+      if (selectedOption && selectedOption.value === questions[current].correct) {
+        score += 5;
+      }
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        endTest();
+      }
+    }
+
+    function endTest() {
+      clearInterval(timerId);
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("scoreDisplay").textContent = `Total Score: ${score} / ${questions.length * 5}`;
+      const iq = Math.round((score / age) * 100);
+      document.getElementById("iqDisplay").textContent = `Your IQ Score: ${iq}`;
+    }
+
+    function startTimer() {
+      const timerEl = document.getElementById("timer");
+      timerId = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerEl.textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (--timeLeft < 0) {
+          endTest();
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
